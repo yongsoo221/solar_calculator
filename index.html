@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>태양광 구조 계산 툴</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+    <div class="app-container">
+        <header class="main-header">
+            <h1>☀️ 태양광 구조 계산 툴</h1>
+            <button class="btn-primary" onclick="addBuilding()">+ 새 동 추가</button>
+        </header>
+
+        <div id="buildings"></div>
+
+        <footer class="total-section">
+            <div class="section-title">
+                <h2>📊 전체 합계 요약</h2>
+                <button class="btn-calculate" onclick="calculateAll()">전체 계산 실행</button>
+            </div>
+            <div class="summary-card">
+                <table>
+                    <tbody id="total-summary">
+                        <tr>
+                            <td style="text-align: center; color: #94a3b8; padding: 20px;">'전체 계산' 버튼을 눌러주세요.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </footer>
+    </div>
+    <script src="script.js"></script>
+</body>
+
+</html>
