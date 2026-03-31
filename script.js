@@ -149,3 +149,85 @@ function calculateAll() {
         </table>
     `;
 }
+
+
+// 기존 calculateAll 함수를 보존하면서 기능을 확장합니다.
+const originalCalculateAll = calculateAll;
+
+calculateAll = function () {
+    // 1. 기존 계산 로직 실행
+    originalCalculateAll();
+
+    // 2. 풀이 과정을 표시할 컨테이너 생성 (없으면 생성)
+    let detailSection = document.getElementById('calculation-details');
+    if (!detailSection) {
+        detailSection = document.createElement('div');
+        detailSection.id = 'calculation-details';
+        detailSection.style.cssText = "margin-top:30px; padding:25px; background:#fff; border-radius:12px; border:1px solid #e2e8f0; color:#334155; line-height:1.8;";
+        document.querySelector('.app-container').appendChild(detailSection);
+    }
+
+    let detailHtml = `<h2 style="color:#1e293b; border-bottom:2px solid #f1f5f9; padding-bottom:10px; margin-bottom:20px;">📝 상세 계산 과정</h2>`;
+
+    // 3. 각 동(Building)별 데이터 수집 및 풀이 작성
+    document.querySelectorAll(".building").forEach((building, index) => {
+        const name = building.querySelector("h2").innerText;
+        const N = Number(building.querySelector(".moduleCount").value) || 0;
+        const A = Number(building.querySelector(".moduleArea").value) || 0;
+        const Wm = Number(building.querySelector(".moduleWeight").value) || 0;
+        const targetLoad = Number(building.querySelector(".targetLoad").value) || 0;
+
+        const installArea = N * A;
+        const moduleTotal = Wm * N;
+        const totalWeight = targetLoad * installArea;
+        const structureWeight = totalWeight - moduleTotal;
+
+        detailHtml += `<div style="margin-bottom:30px; padding:15px; border-left:4px solid #2563eb; background:#f8fafc;">
+            <h3 style="margin-top:0;"> ${name}</h3>`;
+
+        // 1. 설치 면적
+        detailHtml += `<p><b>1. 설치 면적 :</b> ${formatNumber(N)}ea(모듈수량) × ${formatNumber(A)}m²(모듈단면적) = <b>${formatNumber(installArea)}m²</b></p>`;
+
+        // 2. 수평투영면적 (mult가 1이면 생략)
+        let projExps = [];
+        building.querySelectorAll(".projection-terms tr").forEach(row => {
+            const ins = row.querySelectorAll("input");
+            const a = ins[0].value || 0, b = ins[1].value || 0, c = ins[2].value || 0, mult = Number(ins[3].value) || 1;
+
+            // mult가 1이 아닐 때만 수식에 표시
+            let multStr = (mult !== 1) ? ` × ${mult}` : "";
+            projExps.push(`((√${a}² - ${b}²) × ${c}${multStr})`);
+        });
+        const projResult = building.querySelector(".res-proj").innerText;
+        detailHtml += `<p><b>2. 수평투영면적 :</b> ${projExps.length > 0 ? projExps.join(' + ') : '0'} = <b>${projResult}</b></p>`;
+
+        // 3. 부피 (mult, div가 1이면 생략)
+        let volExps = [];
+        building.querySelectorAll(".volume-terms tr").forEach(row => {
+            const ins = row.querySelectorAll("input");
+            const a = ins[0].value || 0, b = ins[1].value || 0, c = ins[2].value || 0,
+                mult = Number(ins[3].value) || 1, div = Number(ins[4].value) || 1;
+
+            // mult와 div가 1이 아닐 때만 수식에 표시
+            let multStr = (mult !== 1) ? ` × ${mult}` : "";
+            let divStr = (div !== 1) ? ` / ${div}` : "";
+            volExps.push(`(${a} × ${b} × ${c}${multStr}${divStr})`);
+        });
+        const volResult = building.querySelector(".res-vol").innerText;
+        detailHtml += `<p><b>3. 부피 :</b> ${volExps.length > 0 ? volExps.join(' + ') : '0'} = <b>${volResult}</b></p>`;
+
+        // 4. 중량
+        detailHtml += `<p><b>4. 중량 :</b> 모듈 중량 ${formatNumber(Wm)}kg(장당) × ${formatNumber(N)}ea = ${formatNumber(moduleTotal)}kg(모듈전체중량) + ${formatNumber(structureWeight)}kg(구조물중량) = <b>${formatNumber(totalWeight)}kg</b></p>`;
+
+        // 5. 적재하중
+        const loadResult = installArea !== 0 ? (totalWeight / installArea).toFixed(2) : 0;
+        detailHtml += `<p><b>5. 적재하중 :</b> ${formatNumber(totalWeight)}kg / ${formatNumber(installArea)}m² = <b>${loadResult} kg/m²</b></p>`;
+
+        detailHtml += `</div>`;
+    });
+
+    detailSection.innerHTML = detailHtml;
+
+    // 계산 완료 후 상세 화면으로 스크롤 이동
+    detailSection.scrollIntoView({ behavior: 'smooth' });
+};
